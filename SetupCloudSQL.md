@@ -116,7 +116,7 @@ gcloud iam service-accounts add-iam-policy-binding \
 ```
 kubectl annotate serviceaccount \
   ksa-cloud-sql  \
-  iam.gke.io/gcp-service-account=gke-quickstart-service-account@$PROJECT_ID.iam.gserviceaccount.com
+  iam.gke.io/gcp-service-account=gke-mytest-service-account@$PROJECT_ID.iam.gserviceaccount.com
 ```
 
 ## Configure Kubernetes Secret
