@@ -1,5 +1,7 @@
 # SpringBoot App Inner Loop Setup
 
+In this lab, we will learn to setup tooling for inner loop container application development of Spring Boot application.
+
 ## Prerequisites
 
 * An editor with Cloud Code such as Cloud Shell Editor or VS Code with Cloud Code extension
@@ -203,7 +205,9 @@ Run the application by opening the URL in web preview in a browser. The browser 
 * Press on Continue icon (or F5)
 * Notice the output in the browser as `Hello Earth!!`
 
-In this step we have learnt who we can look at the execution flow and run step by step debugging. This is very helpful to identify issues quickly.
+Stop the running application thread in the `Debug` view.
+
+Here we have learnt how to navigate the execution flow and run step by step debugging. This is very helpful in quickly identifying issues in the code by watching the running application.
 
 ## Summary 
 
