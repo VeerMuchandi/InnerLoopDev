@@ -46,8 +46,8 @@ Edit the deployment in the `deployment.yaml` file to add the environment variabl
 ```
     spec:
       containers:
-      - name: hello-java
-        image: hello-java
+      - name: myspringbootapp
+        image: myspringbootapp
         env:
         - name: DB_HOST
           value: "[PRIVATEIP OF DATABASE]"        
