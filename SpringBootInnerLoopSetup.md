@@ -17,6 +17,8 @@ git clone https://github.com/spring-guides/gs-spring-boot.git
 
 This will create a new folder namd `gs-spring-boot`.
 
+This code has both gradle and maven build files ie., `build.grade` and `pom.xml`. Certain versions of Java Language extensions in the editor may resolve the dependencies incorrectly. We will be using maven in this lab. Let us rename `build.gradle` to `build.grade.dontuse` to be safe.
+
 In the explorer view, navigate to `gs-spring-boot/complete`, right click and choose `Open as Workspace`
 
 ## Explore code
@@ -25,10 +27,11 @@ Once the workspace opens up, navigate the folder structure in the `Explorer`. Yo
 
 * Source code is in the `src` folder. `src/main/java/com/example/springboot/HelloController.java` is a simple application that displays a greeting.
 * This plain springboot code has no container specific code. We will containerize and deploy it.
-* You can build this code using `mvn` or `gradle`. In this example, we will use `maven`. Locate `pom.xml` file at the root of this workspace.
+* Locate `pom.xml` file at the root of this workspace.
 
  
 ## Setup build mechanism with Skaffold and Jib
+
 
 Edit `pom.xml` file and add the following plugin code snippet in the plugin's section
 

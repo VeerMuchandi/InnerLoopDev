@@ -206,8 +206,8 @@ Run the application on Kubernetes with `Cloud Code`-> `Run/Debug on Kubernetes`.
 Post a couple of records. You can use a tool like httpie as shown below.
 
 ```
-http POST $URL/items itemName="Body Spray" itemPrice=3.2
-http POST $URL/items itemName="Nail Cutter" itemPrice=2.5
+curl -X POST $URL/items -d '{"itemName":"Body Spray", "itemPrice":3.2}' -H "Content-Type: application/json"
+curl -X POST $URL/items -d '{"itemName":"Nail Cutter", "itemPrice":2.5}' -H "Content-Type: application/json"
 ```
 
 Now test the GET by running the `$URL/items` in the browser. It fails and no items are returned.
@@ -318,14 +318,14 @@ Test the delete and update methods you just added
 
 ### Delete test
 ```
-http DELETE $URL/items/3
+curl -X DELETE localhost:8080/items/3
 ```
 Verify changes by running GET again
 
 ### Update Test
 
 ```
-http PUT $URL/items/2 itemName="Nail Cutter" itemPrice=3.5
+curl -X PUT $URL/items/2 -d '{"itemName":"Nail Cutter", "itemPrice":3.5}' -H "Content-Type: application/json"
 ```
 
 Verify changes by running GET again
