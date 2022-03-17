@@ -41,6 +41,11 @@ Edit `pom.xml` file and add the following plugin code snippet in the plugin's se
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>2.8.0</version>
             </plugin>
+            <plugin>
+				        <groupId>org.apache.maven.plugins</groupId>
+				        <artifactId>maven-resources-plugin</artifactId>
+				        <version>3.1.0</version>
+			      </plugin> 
 ```
 
 Open a terminal and run the following command to initialize skaffold, generate kubernetes manifests and setup build using Jib.
@@ -92,6 +97,7 @@ build:
       args: 
       - --no-transfer-progress
       - -Psync
+      - -DskipTests
       fromImage: gcr.io/distroless/java:debug
     sync:
       auto: true
