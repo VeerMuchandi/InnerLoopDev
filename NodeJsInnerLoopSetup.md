@@ -12,25 +12,46 @@ In this lab, we will learn to setup tooling for inner loop container application
 ```
 mkdir mynodejsapp
 ```
-Open this folder as workspace
+ Right click on the folder `mynodejsapp` and open it as workspace. Open a new terminal again in this workspace.
 
-### Install NPM
+### Install Node and NPM using NVM
+
+Install NVM
 
 ```
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+```
 
-Close terminal
-Open new terminal
+Close and Open new terminal.
 
+Install node
+
+```
 nvm install stable
 
 nvm alias default stable
 ```
 
 ### Initialize a nodejs app
+
+Create a `package.json` file by running
 ```
 npm init
-npm i express sequelize pg
+```
+Choose the main script as `src/index.js` and rest of the params as defaut. This will create the file with following contents
+
+```
+{
+  "name": "mynodejsapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
 ```
 
 ### Add code
@@ -43,22 +64,25 @@ const app = express();
 const PORT = 8080;
 
 app.get('/', (req, res) => {
-  res.send({ message: 'Hello World!!' });
-});
+    var message="Greetings from Node";
+    res.send({ message: message });
+  });
 
 app.listen(PORT, () => {
   console.log(`Server running at: http://localhost:${PORT}/`);
+
 });
 ```
 
 Note the PORT is set to value `8080`
 
-Update `package.json` file to include the script for `dev`
+Update `package.json` file to include the script for `dev` that starts using `nodemon`. This is required to hot reload changes inside a container when the code changes.
 
 ```
 
   "scripts": {
-    "dev": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
 ```
@@ -67,27 +91,31 @@ Update `package.json` file to include the script for `dev`
 
 ### Add a Skaffold file
 
+Create a file named `skaffold.yaml` with the following content.
+
 ```
 apiVersion: skaffold/v1
 kind: Config
 build:
   artifacts:
-  - image: gcr.io/veer-dil1/mynodejsapp
+  - image: mynodejsapp
     context: .
     sync:
       infer: 
-      - '*.js'  
+      - '**/*.js'  
 deploy:
   kubectl:
     manifests:
       - k8s-manifests/deployment.yaml
       - k8s-manifests/service.yaml
 ```
+* This skaffold file uses Dockerfile at the root of this workspace to build the container.
+* `sync` copies any changes to `*.js` files to the running container(hot reload)
+* `deploy` section refers the manifests for kubernetes service and deployment.
 
 ### Add a Dockerfile
 
-This Dockerfile is only for development, not to be used in production. It uses `nodemon` so that nodejs can recognize the file changes and immediately reload.
-
+This Dockerfile is only for development as we are installing nodemon 
 ```
 FROM node:12-slim
 
@@ -95,13 +123,13 @@ WORKDIR /opt/backend
 
 COPY . /opt/backend
 RUN npm install 
-RUN npm install cross-env --save-dev
+RUN npm install express cross-env --save-dev
 RUN npm install nodemon -g
 
-CMD ["nodemon", "run", "dev"] 
+CMD ["npm", "run", "dev"] 
 ```
 
-Add `.dockerignore` with the following contents
+Also add `.dockerignore` with the following content so that this data is not copied and synced with the running container.
 
 ```
 node_modules
@@ -111,12 +139,13 @@ Dockerfile
 skaffold.yaml
 k8s-manifests
 .git
-.vscode
 ```
 
 ### Add Kubernetes Manifests
 
-k8s-manifests/deployment.yaml
+Create a folder `k8s-manifests` and the following two files
+
+`k8s-manifests/deployment.yaml` file
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -146,7 +175,7 @@ spec:
 
 ```
 
-k8s-manifests/service.yaml
+`k8s-manifests/service.yaml` file
 
 ```
 apiVersion: v1
@@ -185,12 +214,12 @@ Hover over this URL and click on `Open Web Preview`.
 The application opens up in a new browser tab and a simple greeting is displayed
 
 ```
-{"message":"Hello World!!"}
+{"message":"Greetings from Node"}
 ```
 
 ## Test Hot Reloading
 
-Navigate to `src/index.js`. Edit the code the greeting message to `'Greetings from Node!'`
+Navigate to `src/index.js`. Edit the code the greeting message to `'Hello from Node'`
 
 Notice immediately that in the `Output` window, `Kubernetes: Run/Debug` view, the watcher syncs the updated files with the container in Kubernetes
 
@@ -212,30 +241,37 @@ Watching for changes...
 
 Refresh the browser tab to notice the changes to the greeting message.
 
-Make an additional code changes to observe how the speed of development improves with hot reloading.
-
-* Rather than returning the message directly we will return a String variable
-
-```
-    var message="Greetings from Node";
-    res.send({ message: message });
-```
-
 Test the results.
 
-## Debugging  **WORK IN PROGRESS**
+## Debugging 
 
 Go to the Debug view and stop the current thread.
 
 Click on `Cloud Code` in the bottom menu and select `Debug on Kubernetes` to run the application in `debug` mode.
 * In the `Kubernetes Run/Debug - Detailed` view of `Output` window, notice that skaffold will deploy this application in debug mode.
-* It will take a couple of mins for the application to build and deploy.
+* It will take a couple of mins for the application to build and deploy. You'll notice a debugger attaches this time.
+```
+[mynodejsapp]
+[mynodejsapp]> mynodejsapp@1.0.0 dev /opt/backend
+[mynodejsapp]> nodemon src/index.js
+[mynodejsapp]
+[mynodejsapp][33m[nodemon] 2.0.15[39m
+[mynodejsapp][33m[nodemon] to restart at any time, enter `rs`[39m
+[mynodejsapp][33m[nodemon] watching path(s): *.*[39m
+[mynodejsapp][33m[nodemon] watching extensions: js,mjs,json[39m
+[mynodejsapp][32m[nodemon] starting `node --inspect=0.0.0.0:9229 src/index.js`[39m
+[mynodejsapp]Debugger listening on ws://0.0.0.0:9229/1a7b8a74-a7e3-4e05-ab98-ac86d0d95286
+[mynodejsapp]For help, see: https://nodejs.org/en/docs/inspector
+[mynodejsapp]Server running at: http://localhost:8080/
+Port forwarding pod/mynodejsapp-deployment-6bc7598798-xl9kj in namespace default, remote port 9229 -> http://127.0.0.1:9229
+[mynodejsapp]Debugger attached.
+```
 * The bottom status bar changes its color from blue to orange indicating that it is in Debug mode.
 * In the `Kubernetes Run/Debug` view, notice that a Debuggable container is started
 ```
 **************URLs*****************
 Forwarded URL from service mynodejsapp-service: http://localhost:8080
-Debuggable container started pod/mynodejsapp-deployment-75ddb9b6d-fpfps:mynodejsapp (default)
+Debuggable container started pod/mynodejsapp-deployment-6bc7598798-xl9kj:mynodejsapp (default)
 Update succeeded
 ***********************************
 ```
@@ -250,10 +286,10 @@ Run the application by opening the URL in web preview in a browser. The browser 
 * Notice the call stack
 * Expand `Local` in the Variables to watch the variables
 * Press on step over icon (or F10) to move to the next step
-* Note the `message` variable has a value of `Hello World!!` assigned.
-* Double click on the variable and change it to `Hello Earth!` and press on `OK`
+* Note the `message` variable has a value of `Greetings from Node` assigned.
+* Double click on the variable and change it to `Greetings from Node on GCP` and press on `OK`
 * Press on Continue icon (or F5)
-* Notice the output in the browser as `Hello Earth!!`
+* Notice the output in the browser as `{"message":"Greetings from Node on GCP"}`
 
 Stop the running application thread in the `Debug` view.
 
@@ -261,7 +297,7 @@ Here we have learnt how to navigate the execution flow and run step by step debu
 
 ## Summary 
 
-In this lab we have created a basic SpringBoot application, configured it to build container image using Jib, added Skaffold for interactive application development with containers, added kubernetes manifests and setup application for debugging.
+In this lab we have created a basic Node.js application, configured it to build container image using Dockerfile, added Skaffold for interactive application development with containers, added kubernetes manifests and setup application for debugging.
 
 In the next lab, we will continue with this setup and add some additional functionality to this application to make it a CRUD application. 
 
