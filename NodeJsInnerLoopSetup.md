@@ -162,7 +162,7 @@ spec:
     spec:
       containers:
       - name: mynodejsapp
-        image: gcr.io/veer-dil1/mynodejsapp
+        image: mynodejsapp
         resources:
           requests:
             memory: "32Mi"
