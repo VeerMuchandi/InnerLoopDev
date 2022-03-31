@@ -135,6 +135,21 @@ build:
       builder: gcr.io/buildpacks/builder:v1
 ```
 
+Add `sync` to the `build` so that the editor can sync all the changes to javascript files into running container, as shown below:
+
+```
+build:
+  artifacts:
+  - image: mynodejsapp
+    buildpacks:
+      builder: gcr.io/buildpacks/builder:v1
+    sync:
+      manual:
+      # Sync all the javascript files 
+      - src: '**/*.js'
+        dest: .
+```
+
 Similary, open `deployment.yaml` file and change all occurences of `package-json-image` to `mynodejsapp`. Notice that this file has two manifests:
 
 * a kubernetes deployment that deploys a pod with the container image
